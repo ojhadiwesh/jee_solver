@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  submissions   Submission[]
+  savedProblems SavedProblem[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subject {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  topics      Topic[]
+  problems    Problem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Topic {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  problems    Problem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([name, subjectId])
+}
+
+model Problem {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  difficulty  String    // 'Easy', 'Medium', 'Hard'
+  timeLimit   Int       // in minutes
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  topic       Topic     @relation(fields: [topicId], references: [id])
+  topicId     String
+  options     Option[]
+  hint        String?
+  solution    String?
+  formulaSheet String?
+  type        String    // 'Single Choice', 'Multiple Choice', 'Numerical'
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  submissions Submission[]
+  savedBy     SavedProblem[]
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  text       String
+  isCorrect  Boolean
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Submission {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  String
+  answer     String
+  isCorrect  Boolean
+  workArea   String?  // User's work/calculations
+  timeTaken  Int      // in seconds
+  createdAt  DateTime @default(now())
+}
+
+model SavedProblem {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  String
+  createdAt  DateTime @default(now())
+
+  @@id([userId, problemId])
+}
+
+model TestProgress {
+  userEmail    String
+  testId       String
+  answers      Json
+  timeRemaining Int
+  selectedTopic Json
+  config       Json
+  lastUpdated  DateTime
+  
+  @@id([userEmail, testId])
+  @@index([userEmail])
+}
