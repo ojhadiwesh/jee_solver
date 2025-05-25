@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 
 const FooterSection = ({ title, links }: { title: string; links: { name: string; href: string }[] }) => (
-  <div>
+  <div className="mb-8 md:mb-0">
     <h3 className="font-semibold text-white mb-4">{title}</h3>
     <ul className="space-y-2">
       {links.map((link) => (
@@ -42,11 +42,11 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#1a2234] text-white py-16">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+    <footer className="bg-[#1a2234] text-white py-8 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Brand Section */}
-          <div>
+          <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <Link href="/" className="text-2xl font-bold mb-4 block">
               JEESolver
             </Link>
@@ -79,8 +79,10 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>© 2023 JEESolver. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t border-gray-700 text-center md:text-left">
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} JEESolver. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

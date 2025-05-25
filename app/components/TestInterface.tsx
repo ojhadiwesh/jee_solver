@@ -223,13 +223,13 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="max-w-6xl mx-auto p-4 md:p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Question Palette */}
-        <div className="md:col-span-1">
+        <div className="lg:col-span-1 order-2 lg:order-1">
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Question Palette</h3>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-5 lg:grid-cols-4 gap-2">
               {questions.map((_, index) => (
                 <button
                   key={index}
@@ -269,10 +269,10 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
         </div>
 
         {/* Main Content */}
-        <div className="md:col-span-3">
+        <div className="lg:col-span-3 order-1 lg:order-2">
           {/* Timer and Controls */}
-          <div className="flex items-center justify-between mb-8 bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 bg-white p-4 rounded-lg shadow gap-4">
+            <div className="flex items-center justify-between sm:justify-start gap-4">
               <div className="text-2xl font-bold text-[#2563EB]">
                 {formatTime(timeRemaining)}
               </div>
@@ -287,13 +287,13 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
                 {isPaused ? 'Resume' : 'Pause'}
               </button>
             </div>
-            <div className="text-gray-600">
+            <div className="text-gray-600 text-center sm:text-right">
               Question {currentQuestionIndex + 1} of {questions.length}
             </div>
           </div>
 
           {/* Question Card */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-6">
             {isPaused ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Test Paused</h2>
@@ -301,18 +301,18 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
               </div>
             ) : (
               <>
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-2">
                   {currentQuestion.title}
                 </h2>
                 <p className="text-gray-600 mb-6">{currentQuestion.description}</p>
 
                 {/* Options */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {currentQuestion.options.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleAnswerSelect(option.text)}
-                      className={`w-full p-4 text-left rounded-lg border-2 transition-colors ${
+                      className={`w-full p-3 md:p-4 text-left rounded-lg border-2 transition-colors ${
                         selectedAnswers[currentQuestion.id] === option.text
                           ? 'border-[#2563EB] bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
@@ -330,18 +330,18 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-4">
             <button
               onClick={handlePreviousQuestion}
               disabled={currentQuestionIndex === 0}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 md:px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
               onClick={handleNextQuestion}
               disabled={currentQuestionIndex === questions.length - 1}
-              className="px-6 py-2 bg-[#2563EB] text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 md:px-6 py-2 bg-[#2563EB] text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -351,14 +351,14 @@ export default function TestInterface({ config, onEndTest }: TestInterfaceProps)
 
       {/* Submit Confirmation Modal */}
       {showSubmitConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Submit Test?</h3>
             <p className="text-gray-600 mb-6">
               You have answered {Object.keys(selectedAnswers).length} out of {questions.length} questions.
               Are you sure you want to submit?
             </p>
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end gap-4">
               <button
                 onClick={() => setShowSubmitConfirm(false)}
                 className="px-4 py-2 text-gray-700 hover:text-gray-900"

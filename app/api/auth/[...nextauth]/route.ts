@@ -6,6 +6,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "../../../../lib/prisma";
 import bcrypt from "bcryptjs";
+import connectDB from '@/lib/db';
+import User from '@/models/User';
 
 declare module "next-auth" {
   interface Session {
@@ -30,106 +32,70 @@ if (!process.env.NEXTAUTH_SECRET) {
   throw new Error('Missing NEXTAUTH_SECRET environment variable');
 }
 
-export const authOptions: NextAuthConfig = {
-  adapter: PrismaAdapter(prisma),
+const handler = NextAuth({
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
-    }),
     CredentialsProvider({
-      name: "credentials",
+      name: 'Credentials',
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        try {
-          console.log('Attempting credentials authorization...');
-          
-          if (!credentials?.email || !credentials?.password) {
-            console.log('Missing credentials');
-            throw new Error('Please enter your email and password');
-          }
-
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email
-            },
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              password: true
-            }
-          });
-
-          console.log('User lookup result:', user ? 'Found' : 'Not found');
-
-          if (!user || !user.password) {
-            console.log('No user found or no password set');
-            throw new Error('No user found with this email');
-          }
-
-          const passwordMatch = await bcrypt.compare(
-            credentials.password.toString(),
-            user.password
-          );
-
-          console.log('Password match result:', passwordMatch);
-
-          if (!passwordMatch) {
-            console.log('Password does not match');
-            throw new Error('Incorrect password');
-          }
-
-          console.log('Authorization successful');
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name
-          };
-        } catch (error) {
-          console.error('Authorization error:', error);
-          throw error;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter an email and password');
         }
+
+        await connectDB();
+        
+        const user = await User.findOne({ email: credentials.email });
+        
+        if (!user) {
+          throw new Error('No user found with this email');
+        }
+
+        const isValid = await user.comparePassword(credentials.password);
+        
+        if (!isValid) {
+          throw new Error('Invalid password');
+        }
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
       }
     })
   ],
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 // 30 days
-  },
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-    signOut: "/auth/signin"
+    signIn: '/auth/signin',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user, account }) {
-      console.log('JWT Callback:', { hasUser: !!user, hasAccount: !!account });
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
       }
       return token;
     },
     async session({ session, token }) {
-      console.log('Session Callback:', { hasSession: !!session, hasToken: !!token });
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.image = token.picture as string | null;
       }
       return session;
     }
   },
-  debug: true
-};
+  secret: process.env.NEXTAUTH_SECRET,
+});
 
-const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST }; 
