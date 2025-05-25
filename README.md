@@ -32,31 +32,110 @@ A comprehensive JEE preparation platform with advanced analytics and performance
 - Prisma ORM
 - NextAuth.js for authentication
 
-## Getting Started
+## Local Development Setup
 
-1. Clone the repository:
+1. **Prerequisites:**
+   - Node.js 18+ installed
+   - PostgreSQL installed and running
+   - Git installed
+
+2. **Clone the repository:**
    ```bash
    git clone https://github.com/ojhadiwesh/jee_solver.git
    cd jee_solver
    ```
 
-2. Install dependencies:
+3. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Fill in the required environment variables.
+4. **Set up environment variables:**
+   Create a `.env` file in the root directory with the following variables:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/jee_solver"
 
-4. Run the development server:
+   # NextAuth.js
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key"
+
+   # OAuth Providers (optional)
+   GOOGLE_CLIENT_ID=""
+   GOOGLE_CLIENT_SECRET=""
+   ```
+
+5. **Initialize the database:**
+   ```bash
+   # Run database migrations
+   npx prisma migrate dev
+
+   # Seed the database with initial data
+   npx prisma db seed
+   ```
+
+6. **Start the development server:**
    ```bash
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+7. **Access the application:**
+   - Open [http://localhost:3000](http://localhost:3000) in your browser
+   - Default admin credentials:
+     - Email: admin@example.com
+     - Password: admin123
+
+## Development Commands
+
+```bash
+# Run tests
+npm test
+
+# Run linter
+npm run lint
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Generate Prisma client
+npx prisma generate
+
+# Reset database
+npx prisma reset
+```
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **Database Connection Issues:**
+   ```bash
+   # Check database status
+   npx prisma db push --preview-feature
+   
+   # Reset database
+   npx prisma migrate reset
+   ```
+
+2. **Dependencies Issues:**
+   ```bash
+   # Clear npm cache
+   npm cache clean --force
+   
+   # Reinstall dependencies
+   rm -rf node_modules
+   npm install
+   ```
+
+3. **Port Already in Use:**
+   - Check if port 3000 is available
+   - Change port in package.json if needed:
+     ```json
+     "dev": "next dev -p 3001"
+     ```
 
 ## Contributing
 
